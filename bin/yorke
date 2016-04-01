@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+import argparse
+import sys
+
+from yorke import RandomPad, Xor, byte_by_byte
+
+
+def random_pad(args):
+    input = sys.stdin.read()
+    rp = RandomPad().encrypt(input)
+    sys.stdout.write(rp.cipher_text)
+    sys.stderr.write(rp.key_text)
+
+
+def string_xor(args):
+    right = args.right or sys.stdin.read()
+    print Xor.str(Xor.strings(args.left, right))
+
+
+def file_xor(args):
+    with open(args.left, 'r') as left_fd:
+        if args.right:
+            with open(args.right, 'r') as right_fd:
+                sys.stdout.write(Xor.str(Xor.files(left_fd, right_fd)))
+        else:
+            sys.stdout.write(Xor.str(Xor.files(left_fd, sys.stdin)))
+
+
+def init_parser():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(help='Subcommand', dest='mode')
+    random_pad_parser = subparsers.add_parser('rp')
+    random_pad_parser = subparsers.add_parser('random_pad')
+    for input_type in ('string_', 'file_', 's', 'f'):
+        xor_parser = subparsers.add_parser('{}xor'.format(input_type))
+        xor_parser.add_argument('left', type=str)
+        xor_parser.add_argument('right', nargs='?', type=str, default=None)
+    return parser
+
+
+dispatch_table = dict(
+    random_pad=random_pad,
+    rp=random_pad,
+
+    string_xor=string_xor,
+    sxor=string_xor,
+
+    file_xor=file_xor,
+    fxor=file_xor,
+)
+
+def main():
+    parser = init_parser()
+    args = parser.parse_args()
+    try:
+        return dispatch_table[args.mode](args)
+    except KeyError:
+        print 'Invalid command: {}'.format(args.mode)
+
+
+if __name__ == '__main__':
+    main()
