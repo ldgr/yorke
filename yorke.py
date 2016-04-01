@@ -42,12 +42,15 @@ class RandomPad(object):
         self.key_bytes = []
         self.cipher_bytes = []
 
-    def encrypt(self, plain_text):
-        for character in plain_text:
+    def encrypt_bytes(self, byte_stream):
+        for byte in byte_stream:
             random_byte = randint(0, 255)
             self.key_bytes.append(random_byte)
-            self.cipher_bytes.append(ord(character) ^ random_byte)
+            self.cipher_bytes.append(byte ^ random_byte)
         return self
+
+    def encrypt_string(self, plain_text):
+        return self.encrypt_bytes(map(ord, plain_text))
 
     @property
     def key_text(self):

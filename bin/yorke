@@ -6,8 +6,8 @@ from yorke import RandomPad, Xor, byte_by_byte
 
 
 def random_pad(args):
-    input = sys.stdin.read()
-    rp = RandomPad().encrypt(input)
+    input = byte_by_byte(sys.stdin)
+    rp = RandomPad().encrypt_bytes(input)
     sys.stdout.write(rp.cipher_text)
     sys.stderr.write(rp.key_text)
 

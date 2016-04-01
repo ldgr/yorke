@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+set -e
 
 SECRET='More secret than top secret'
 
-mkdir out
+mkdir out || echo "directory ./out exists"
 cd out
 
 printf "$SECRET" | yorke random_pad 1> cipher.txt 2> key.txt
@@ -18,3 +19,5 @@ diff <(xxd plain.txt) <(xxd expected.txt)
 
 cat key.txt | yorke fxor  cipher.txt > plain.txt
 diff <(xxd plain.txt) <(xxd expected.txt)
+
+echo "Tests Ran Successfully"

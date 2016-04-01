@@ -42,10 +42,14 @@ class TestRandomPad(TestCase):
         self.assertEqual(rp.cipher_bytes, [])
 
         plain = 'More secret than top secret'
-        self.assertEqual(rp, rp.encrypt(plain))
+        self.assertEqual(rp, rp.encrypt_string(plain))
         self.assertEqual(
             rp.cipher_bytes,
             [ord(c) ^ b for c, b in zip(plain, rp.key_bytes)]
         )
         self.assertEqual(rp.key_text, ''.join(map(chr, rp.key_bytes)))
         self.assertEqual(rp.cipher_text, ''.join(map(chr, rp.cipher_bytes)))
+        self.assertEqual(
+            Xor.str(Xor.strings(rp.key_text, rp.cipher_text)),
+            plain
+        )
