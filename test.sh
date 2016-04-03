@@ -1,23 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-SECRET='More secret than top secret'
-
 mkdir out || echo "directory ./out exists"
 cd out
 
-printf "$SECRET" | yorke random_pad 1> cipher.txt 2> key.txt
-printf "$SECRET" | yorke rp         1> cipher.txt 2> key.txt
+echo 'More secret than top secret' > plain.txt
 
-printf "$SECRET" > expected.txt
-
-yorke file_xor cipher.txt key.txt > plain.txt
-diff <(xxd plain.txt) <(xxd expected.txt)
-
-yorke fxor key.txt cipher.txt > plain.txt
-diff <(xxd plain.txt) <(xxd expected.txt)
-
-cat key.txt | yorke fxor  cipher.txt > plain.txt
-diff <(xxd plain.txt) <(xxd expected.txt)
+yorke xor plain.txt <(cat /dev/urandom | tee key.txt) > cipher.txt
+yorke xor cipher.txt key.txt > plain2.txt
+diff <(xxd plain.txt) <(xxd plain2.txt)
 
 echo "Tests Ran Successfully"

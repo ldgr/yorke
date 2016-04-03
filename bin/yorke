@@ -1,52 +1,44 @@
 #!/usr/bin/env python
 import argparse
+import hashlib
 import sys
 
-from yorke import RandomPad, Xor, byte_by_byte
-
-
-def random_pad(args):
-    input = byte_by_byte(sys.stdin)
-    rp = RandomPad().encrypt_bytes(input)
-    sys.stdout.write(rp.cipher_text)
-    sys.stderr.write(rp.key_text)
-
-
-def string_xor(args):
-    right = args.right or sys.stdin.read()
-    print Xor.str(Xor.strings(args.left, right))
+from yorke import Xor, byte_by_byte, recurrence_relation
 
 
 def file_xor(args):
     with open(args.left, 'r') as left_fd:
-        if args.right:
-            with open(args.right, 'r') as right_fd:
-                sys.stdout.write(Xor.str(Xor.files(left_fd, right_fd)))
-        else:
-            sys.stdout.write(Xor.str(Xor.files(left_fd, sys.stdin)))
+        with open(args.right, 'r') as right_fd:
+            sys.stdout.write(Xor.str(Xor.files(left_fd, right_fd)))
+
+
+def sha256(args):
+    x0 = args.x0
+    stream_generator = recurrence_relation(lambda x: hashlib.sha256(x).digest())
+    try:
+        for output in stream_generator(x0):
+            sys.stdout.write(output)
+    except IOError:
+        return
 
 
 def init_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help='Subcommand', dest='mode')
-    random_pad_parser = subparsers.add_parser('rp')
-    random_pad_parser = subparsers.add_parser('random_pad')
-    for input_type in ('string_', 'file_', 's', 'f'):
-        xor_parser = subparsers.add_parser('{}xor'.format(input_type))
-        xor_parser.add_argument('left', type=str)
-        xor_parser.add_argument('right', nargs='?', type=str, default=None)
+
+    xor_parser = subparsers.add_parser('xor')
+    xor_parser.add_argument('left', type=str)
+    xor_parser.add_argument('right', nargs='?', type=str, default=None)
+
+    sha256_parser = subparsers.add_parser('sha256')
+    sha256_parser.add_argument('x0', type=str)
+
     return parser
 
 
 dispatch_table = dict(
-    random_pad=random_pad,
-    rp=random_pad,
-
-    string_xor=string_xor,
-    sxor=string_xor,
-
-    file_xor=file_xor,
-    fxor=file_xor,
+    xor=file_xor,
+    sha256=sha256,
 )
 
 def main():

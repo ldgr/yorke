@@ -1,27 +1,19 @@
 # Yorke
 
-Yorke is an experimental encryption library and command-line tool.
+Yorke is an experimental stream cipher library and command-line tool.
 
 # Usage
 
-Encrypt a file using a randomly generated pad. The encrypted cipher text is
-sent to STDOUT and the random pad is sent STDERR:
+Encrypt a message with a random pad:
 
-```
-cat plain.txt | yorke random_pad 1> cipher.txt 2> key.txt
-cat plain.txt | yorke rp         1> cipher.txt 2> key.txt
-```
-
-Decrypt a file using a previously generated pad:
-
-```
-yorke file_xor cipher.txt key.txt > plain.txt
-yorke fxor key.txt cipher.txt > plain.txt
+```bash
+yorke xor <(echo "secret message") <(cat /dev/urandom | tee key.txt) > cipher.txt
+yorke xor cipher.txt key.txt
 ```
 
 # Installation
 
-```
+```bash
 git clone https://github.com/ldgr/yorke.git
 cd yorke
 python setup.py install
@@ -29,13 +21,13 @@ python setup.py install
 
 # Testing
 
-Library:
-```
+Run library tests:
+```bash
 pip install nose
 nosetests
 ```
 
-Command:
-```
+Run command tests:
+```bash
 ./test.sh
 ```
